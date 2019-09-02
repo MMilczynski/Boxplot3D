@@ -1,13 +1,15 @@
 import scipy
+import ipdb
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 from mpl_toolkits import mplot3d
 from matplotlib.patches import Rectangle
 
 
 class BoxplotParams:
     def __init__(self, x, whisker_type='IQR'):
-        if not isinstance(x, np.array):
+        if not isinstance(x, np.ndarray):
             self._x = np.array(x)
         else:
             self._x = x
@@ -48,12 +50,46 @@ class BoxplotParams:
         self.whiskers = np.array([lower_whisker, upper_whisker])
         self.outliers = self._x[out_idx]
 
-    def _calc_params(self):
+    def calc_params(self):
         self._calc_median()
         self._calc_percentiles()
         self._calc_iqr()
+        self._calc_min_max()
+        self._calc_whiskers()
 
 
-# def plot_boxplot3D(data1, data2, data3):
-#    fig = plt.figure()
-#    ax = plt.axes(projection='3d')
+def plot_boxplot3D(x, y, z):
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+
+    bp_par_x = BoxplotParams(x)
+    bp_par_y = BoxplotParams(y)
+    bp_par_z = BoxplotParams(z)
+
+    bp_par_x.calc_params()
+    bp_par_y.calc_params()
+    bp_par_z.calc_params()
+
+    n_grid_pts = 3
+    # z-data rectangles -> yp75 or yp25 fix
+    z_rec_x = np.linspace(bp_par_x.perc_25, bp_par_x.perc_75, n_grid_pts)
+    z_rec_z = np.linspace(bp_par_z.perc_25, bp_par_z.perc_75, n_grid_pts)
+    z_rec_xx, z_rec_zz = np.meshgrid(z_rec_x, z_rec_z)
+
+    z_rec_y_front = np.repeat(bp_par_y.perc_75, np.power(n_grid_pts, 2))
+    z_rec_y_front = z_rec_y_front.reshape(n_grid_pts, n_grid_pts)
+
+    z_rec_y_back = np.repeat(bp_par_y.perc_25, np.power(n_grid_pts, 2))
+    z_rec_y_back = z_rec_y_back.reshape(n_grid_pts, n_grid_pts)
+
+    ax.plot_surface(z_rec_xx, z_rec_y_front, z_rec_zz)
+    ax.plot_surface(z_rec_xx, z_rec_y_back, z_rec_zz)
+
+    plt.show()
+
+
+def test_boxpot3D():
+    x = np.random.randn(100)*5 + 10
+    y = np.random.randn(100)*0.5 + 30
+    z = np.random.randn(100)*3.5 + 20
+    plot_boxplot3D(x, y, z)
