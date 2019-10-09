@@ -1,10 +1,5 @@
-import scipy
-import ipdb
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-from mpl_toolkits import mplot3d
-from matplotlib.patches import Rectangle
 from mayavi import mlab
 
 median_thickness_scaling = 0.02
