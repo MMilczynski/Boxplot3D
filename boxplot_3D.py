@@ -118,35 +118,6 @@ class Params:
         self._outliers = self._data[out_idx]
 
 
-def plot_z_rectangles(bp_par_x, bp_par_y, bp_par_z, axes, n_grid_pts, alpha):
-    # z-data rectangles
-    iqr_offset = SCALING*bp_par_z.iqr
-    z_rec_x = np.linspace(bp_par_x.percentile_25,
-                          bp_par_x.percentile_75, n_grid_pts)
-    z_rec_z_1 = np.linspace(
-        bp_par_z.percentile_25, bp_par_z.median - iqr_offset, n_grid_pts)
-    z_rec_xx_1, z_rec_zz_1 = np.meshgrid(z_rec_x, z_rec_z_1)
-
-    z_rec_z_2 = np.linspace(bp_par_z.median + iqr_offset,
-                            bp_par_z.percentile_75, n_grid_pts)
-    z_rec_xx_2, z_rec_zz_2 = np.meshgrid(z_rec_x, z_rec_z_2)
-
-    z_rec_y_front = np.repeat(bp_par_y.percentile_75, np.power(n_grid_pts, 2))
-    z_rec_y_front = z_rec_y_front.reshape(n_grid_pts, n_grid_pts)
-
-    z_rec_y_back = np.repeat(bp_par_y.percentile_25, np.power(n_grid_pts, 2))
-    z_rec_y_back = z_rec_y_back.reshape(n_grid_pts, n_grid_pts)
-
-    axes.plot_surface(z_rec_xx_1, z_rec_y_front,
-                      z_rec_zz_1, alpha=alpha, color=Z_COLOR)
-    axes.plot_surface(z_rec_xx_2, z_rec_y_front,
-                      z_rec_zz_2, alpha=alpha, color=Z_COLOR)
-    axes.plot_surface(z_rec_xx_1, z_rec_y_back, z_rec_zz_1,
-                      alpha=alpha, color=Z_COLOR)
-    axes.plot_surface(z_rec_xx_2, z_rec_y_back, z_rec_zz_2,
-                      alpha=alpha, color=Z_COLOR)
-
-
 class Surface:
     """Surface of boxplot 3D. 
     """
@@ -280,64 +251,6 @@ class Surface:
                           alpha=ALPHA, color=X_COLOR)
 
 
-def plot_x_rectangles(bp_par_x, bp_par_y, bp_par_z, axes, n_grid_pts, alpha):
-    # x-data rectangles
-    iqr_offset = SCALING*bp_par_x.iqr
-    x_rec_x_1 = np.linspace(
-        bp_par_x.percentile_25, bp_par_x.median - iqr_offset, n_grid_pts)
-    x_rec_y = np.linspace(bp_par_y.percentile_25,
-                          bp_par_y.percentile_75, n_grid_pts)
-    x_rec_xx_1, x_rec_yy_1 = np.meshgrid(x_rec_x_1, x_rec_y)
-
-    x_rec_x_2 = np.linspace(
-        bp_par_x.median + iqr_offset, bp_par_x.percentile_75, n_grid_pts)
-    x_rec_xx_2, x_rec_yy_2 = np.meshgrid(x_rec_x_2, x_rec_y)
-
-    x_rec_z_top = np.repeat(bp_par_z.percentile_75, np.power(n_grid_pts, 2))
-    x_rec_z_top = x_rec_z_top.reshape(n_grid_pts, n_grid_pts)
-
-    x_rec_z_bottom = np.repeat(bp_par_z.percentile_25, np.power(n_grid_pts, 2))
-    x_rec_z_bottom = x_rec_z_bottom.reshape(n_grid_pts, n_grid_pts)
-
-    axes.plot_surface(x_rec_xx_1, x_rec_yy_1, x_rec_z_top,
-                      alpha=alpha, color=X_COLOR)
-    axes.plot_surface(x_rec_xx_2, x_rec_yy_2, x_rec_z_top,
-                      alpha=alpha, color=X_COLOR)
-    axes.plot_surface(x_rec_xx_1, x_rec_yy_1, x_rec_z_bottom,
-                      alpha=alpha, color=X_COLOR)
-    axes.plot_surface(x_rec_xx_2, x_rec_yy_2, x_rec_z_bottom,
-                      alpha=alpha, color=X_COLOR)
-
-
-def plot_y_rectangles(bp_par_x, bp_par_y, bp_par_z, axes, n_grid_pts, alpha):
-    # y-data rectangles
-    iqr_offset = SCALING*bp_par_y.iqr
-    y_rec_y_1 = np.linspace(
-        bp_par_y.percentile_25, bp_par_y.median - iqr_offset, n_grid_pts)
-    y_rec_z = np.linspace(bp_par_z.percentile_25,
-                          bp_par_z.percentile_75, n_grid_pts)
-    y_rec_yy_1, y_rec_zz_1 = np.meshgrid(y_rec_y_1, y_rec_z)
-
-    y_rec_y_2 = np.linspace(
-        bp_par_y.median + iqr_offset, bp_par_y.percentile_75, n_grid_pts)
-    y_rec_yy_2, y_rec_zz_2 = np.meshgrid(y_rec_y_2, y_rec_z)
-
-    y_rec_x_right = np.repeat(bp_par_x.percentile_75, np.power(n_grid_pts, 2))
-    y_rec_x_right = y_rec_x_right.reshape(n_grid_pts, n_grid_pts)
-
-    y_rec_x_left = np.repeat(bp_par_x.percentile_25, np.power(n_grid_pts, 2))
-    y_rec_x_left = y_rec_x_left.reshape(n_grid_pts, n_grid_pts)
-
-    axes.plot_surface(y_rec_x_right, y_rec_yy_1, y_rec_zz_1,
-                      alpha=alpha, color=Y_COLOR)
-    axes.plot_surface(y_rec_x_right, y_rec_yy_2, y_rec_zz_2,
-                      alpha=alpha, color=Y_COLOR)
-    axes.plot_surface(y_rec_x_left, y_rec_yy_1, y_rec_zz_1,
-                      alpha=alpha, color=Y_COLOR)
-    axes.plot_surface(y_rec_x_left, y_rec_yy_2, y_rec_zz_2,
-                      alpha=alpha, color=Y_COLOR)
-
-
 def plot_z_medians_2(bp_par_x, bp_par_y, bp_par_z, axes, n_grid_pts):
     offset = SCALING*bp_par_z.iqr
     z_rec_x = np.linspace(bp_par_x.percentile_25,
@@ -391,48 +304,6 @@ def plot_y_medians_2(bp_par_x, bp_par_y, bp_par_z, axes, n_grid_pts):
 
     axes.plot_surface(y_rec_x_right, y_rec_yy, y_rec_zz, color='k', zorder=0.5)
     axes.plot_surface(y_rec_x_left, y_rec_yy, y_rec_zz, color='k', zorder=0.5)
-
-
-def plot_z_medians(bp_par_x, bp_par_y, bp_par_z, axes, offset=0.1):
-    color = 'k'
-    linewidth = 2
-    # z-medians
-    axes.plot([bp_par_x.percentile_25, bp_par_x.percentile_75], [
-        bp_par_y.percentile_75 + offset, bp_par_y.percentile_75 + offset], bp_par_z.median,
-        color=color,
-        linewidth=linewidth)
-    axes.plot([bp_par_x.percentile_25, bp_par_x.percentile_75], [
-        bp_par_y.percentile_25 - offset, bp_par_y.percentile_25 - offset], bp_par_z.median,
-        color=color,
-        linewidth=linewidth)
-
-
-def plot_x_medians(bp_par_x, bp_par_y, bp_par_z, axes):
-    color = 'k'
-    linewidth = 2
-    # x-medians
-    axes.plot([bp_par_x.median, bp_par_x.median], [
-        bp_par_y.percentile_25, bp_par_y.percentile_75], bp_par_z.percentile_25,
-        color=color,
-        linewidth=linewidth)
-    axes.plot([bp_par_x.median, bp_par_x.median], [
-        bp_par_y.percentile_25, bp_par_y.percentile_75], bp_par_z.percentile_75,
-        color=color,
-        linewidth=linewidth)
-
-
-def plot_y_medians(bp_par_x, bp_par_y, bp_par_z, axes):
-    color = 'k'
-    linewidth = 2
-    # x-medians
-    axes.plot([bp_par_x.percentile_25, bp_par_x.percentile_25], [
-        bp_par_y.median, bp_par_y.median], [bp_par_z.percentile_25, bp_par_z.percentile_75],
-        color=color,
-        linewidth=linewidth)
-    axes.plot([bp_par_x.percentile_75, bp_par_x.percentile_75], [
-        bp_par_y.median, bp_par_y.median], [bp_par_z.percentile_25, bp_par_z.percentile_75],
-        color=color,
-        linewidth=linewidth)
 
 
 def plot_z_whiskers(bp_par_x, bp_par_y, bp_par_z, axes):
@@ -496,10 +367,6 @@ def plot(x, y, z):
                      width_par=bp_par_z,
                      pos_par=bp_par_x, order='y')
     y_surf.build_surface(axes)
-
-    # plot_z_rectangles(bp_par_x, bp_par_y, bp_par_z, ax, n_grid_pts, ALPHA)
-    # plot_x_rectangles(bp_par_x, bp_par_y, bp_par_z, ax, n_grid_pts, ALPHA)
-    # plot_y_rectangles(bp_par_x, bp_par_y, bp_par_z, ax, n_grid_pts, ALPHA)
 
     plot_z_medians_2(bp_par_x, bp_par_y, bp_par_z, axes, 3)
     plot_x_medians_2(bp_par_x, bp_par_y, bp_par_z, axes, 3)
