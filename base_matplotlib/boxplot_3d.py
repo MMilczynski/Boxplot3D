@@ -3,7 +3,7 @@
     boxplot_3D.py
     -------------
 
-    :copyright 2019 Matthias Milczynski
+    :copyright 2020 Matthias Milczynski
     :license ??
 """
 import numpy as np
@@ -35,8 +35,8 @@ class Params:
             raise Exception("Only whisker types 'IQR' and 'MinMax' allowed")
         self._whisker_type = whisker_type
         self._median = None
-        self._percentile_25 = None
-        self._percentile_75 = None
+        self._percentile_low = None
+        self._percentile_high = None
         self._iqr = None
         self._min = None
         self._max = None
@@ -48,11 +48,11 @@ class Params:
 
     @property
     def percentile_25(self):
-        return self._percentile_25
+        return self._percentile_low
 
     @property
     def percentile_75(self):
-        return self._percentile_75
+        return self._percentile_high
 
     @property
     def iqr(self):
@@ -87,13 +87,13 @@ class Params:
     def _calculate_percentiles(self):
         """Calculates 25 and 75 percentiles.
         """
-        self._percentile_25 = np.percentile(self._data, 25)
-        self._percentile_75 = np.percentile(self._data, 75)
+        self._percentile_low = np.percentile(self._data, 25)
+        self._percentile_high = np.percentile(self._data, 75)
 
     def _calculate_iqr(self):
         """Calculates inter-quantile range.
         """
-        self._iqr = self._percentile_75 - self._percentile_25
+        self._iqr = self._percentile_high - self._percentile_low
 
     def _calculate_min_max(self):
         """Calculates min/max.
@@ -107,8 +107,8 @@ class Params:
         The lower extreme whisker data-point with lowest value within
         25th percentile - 1.5*IQR.
         """
-        self._lower_limit = self._percentile_25 - 1.5*self._iqr
-        self._upper_limit = self._percentile_75 + 1.5*self._iqr
+        self._lower_limit = self._percentile_low - 1.5*self._iqr
+        self._upper_limit = self._percentile_high + 1.5*self._iqr
         min_idx = self._data >= self._lower_limit
         max_idx = self._data <= self._upper_limit
         out_idx = np.logical_not(np.logical_or(min_idx, max_idx))
