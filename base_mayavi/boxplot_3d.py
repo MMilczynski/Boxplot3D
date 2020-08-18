@@ -7,7 +7,7 @@
     :license ??
 """
 import numpy as np
-from mayavi.mlab import * as mlab
+# from mayavi.mlab import * as mlab
 
 SCALING = 0.02
 X_COLOR = (0.9, 0.0, 0.3)
