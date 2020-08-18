@@ -50,8 +50,8 @@ def test_surface():
                    alpha=0.9,
                    x_color=x_color,
                    y_color=y_color,
-                   z_color=z_color,
-                   scaling=.02)
+                   z_color=z_color)
+
     surf.build_surface(axes)
     surf.build_whiskers(axes)
 
@@ -82,8 +82,7 @@ def test_boxplot3D():
                      alpha=0.9,
                      x_color=x_color,
                      y_color=y_color,
-                     z_color=z_color,
-                     scaling=.02)
+                     z_color=z_color)
     surf_z.build_surface(axes)
     surf_z.build_whiskers(axes)
 
@@ -94,8 +93,7 @@ def test_boxplot3D():
                      alpha=0.9,
                      x_color=x_color,
                      y_color=y_color,
-                     z_color=z_color,
-                     scaling=.02)
+                     z_color=z_color)
     surf_x.build_surface(axes)
     surf_x.build_whiskers(axes)
 
@@ -106,8 +104,7 @@ def test_boxplot3D():
                      alpha=0.9,
                      x_color=x_color,
                      y_color=y_color,
-                     z_color=z_color,
-                     scaling=.02)
+                     z_color=z_color)
     surf_y.build_surface(axes)
     surf_y.build_whiskers(axes)
 
