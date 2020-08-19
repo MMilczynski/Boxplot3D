@@ -2,6 +2,10 @@
     "Surface": {
         "iqr_offset": 0.02,
         "number_grid_points": 3,
-        "whisker_scaling": 0.05
+        "whisker_scaling": 0.05,
+        "alpha": 0.9,
+        "x_color": "#2DD9C9",
+        "y_color": "#2DD97B",
+        "z_color": "#2D90D9"
     }
 }

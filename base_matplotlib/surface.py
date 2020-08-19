@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import Boxplot3D.base_matplotlib.config as config
 
 
-class SurfaceGroup:
+class PercentileSurfaces:
     """
     """
 
@@ -11,11 +11,7 @@ class SurfaceGroup:
                  data_par,
                  width_par,
                  pos_par,
-                 order,
-                 alpha,
-                 x_color,
-                 y_color,
-                 z_color):
+                 order):
         """
         """
         self._data_par = data_par
@@ -40,15 +36,10 @@ class SurfaceGroup:
 
         self._primary_mesh = None
         self._secondary_mesh = None
-        self._primary_whisker_mesh_main = None
-        self._secondary_whisker_mesh_main = None
-        self._primary_whisker_mesh_rotated = None
-        self._secondary_whisker_mesh_rotated = None
-
-        self._alpha = alpha
-        self._x_color = x_color
-        self._y_color = y_color
-        self._z_color = z_color
+        self._alpha = config.CONFIG['Surface']['alpha']
+        self._x_color = config.CONFIG['Surface']['x_color']
+        self._y_color = config.CONFIG['Surface']['y_color']
+        self._z_color = config.CONFIG['Surface']['z_color']
 
     def create_empty_meshgrid(self):
         """
@@ -130,21 +121,13 @@ class SurfaceGroup:
         self._z_data_1 = self._low_mesh[0]
         self._z_data_2 = self._high_mesh[0]
 
-    def build_surface(self, axes):
+    def build(self, axes):
         """
         """
         self._gen_meshgrids()
         self._replicate_meshgrids()
         getattr(self, '_establish_' + self._order + '_order')()
         getattr(self, '_plot_' + self._order + '_surface')(axes)
-
-    """
-    def build_whiskers(self, axes):
-        self._gen_whisker_meshgrids()
-        self._replicate_whisker_meshgrids()
-        getattr(self, '_establish_' + self._order + '_whisker_order')()
-        getattr(self, '_plot_' + self._order + '_whiskers')(axes)
-    """
 
     def _plot_z_surface(self, axes):
         """
@@ -183,33 +166,34 @@ class SurfaceGroup:
                           alpha=self._alpha, color=self._y_color)
 
 
-class Percentile(SurfaceGroup):
-    def __init__(self, *arg, **kwarg):
-        super().__init__(*arg, **kwarg)
-
-
-class Whisker(Percentile):
+class WhiskerSurfaces(PercentileSurfaces):
     def __init__(self, *arg, **kwarg):
         super().__init__(*arg, **kwarg)
         self._whisker_scaling = config.CONFIG['Surface']['whisker_scaling']
-        self._low_whisker_mesh_main = self.create_empty_meshgrid()
-        self._high_whisker_mesh_main = self.create_empty_meshgrid()
-        self._low_whisker_mesh_rotated = self.create_empty_meshgrid()
-        self._high_whisker_mesh_rotated = self.create_empty_meshgrid()
 
-        self._x_whisker_main_data_1 = None
-        self._x_whisker_main_data_2 = None
-        self._y_whisker_main_data_1 = None
-        self._y_whisker_main_data_2 = None
-        self._z_whisker_main_data_1 = None
-        self._z_whisker_main_data_2 = None
+        self._low_mesh = self.create_empty_meshgrid()
+        self._high_mesh = self.create_empty_meshgrid()
+        self._low_mesh_rotated = self.create_empty_meshgrid()
+        self._high_mesh_rotated = self.create_empty_meshgrid()
 
-        self._x_whisker_rotated_data_1 = None
-        self._x_whisker_rotated_data_2 = None
-        self._y_whisker_rotated_data_1 = None
-        self._y_whisker_rotated_data_2 = None
-        self._z_whisker_rotated_data_1 = None
-        self._z_whisker_rotated_data_2 = None
+        self._x_data_1 = None
+        self._x_data_2 = None
+        self._y_data_1 = None
+        self._y_data_2 = None
+        self._z_data_1 = None
+        self._z_data_2 = None
+
+        self._x_data_1_rotated = None
+        self._x_data_2_rotated = None
+        self._y_data_1_rotated = None
+        self._y_data_2_rotated = None
+        self._z_data_1_rotated = None
+        self._z_data_2_rotated = None
+
+        self._primary_mesh = None
+        self._secondary_mesh = None
+        self._primary_mesh_rotated = None
+        self._secondary_mesh_rotated = None
 
     def _gen_meshgrids(self):
 
@@ -228,11 +212,11 @@ class Whisker(Percentile):
                               self._n_grid_pts)
 
         # generate meshgrid for main low percentile whisker
-        self._low_whisker_mesh_main[0], self._low_whisker_mesh_main[1] = np.meshgrid(
+        self._low_mesh[0], self._low_mesh[1] = np.meshgrid(
             comp_11, comp_12)
 
         # generate meshgrid for main high percentile whisker
-        self._high_whisker_mesh_main[0], self._high_whisker_mesh_main[1] = np.meshgrid(
+        self._high_mesh[0], self._high_mesh[1] = np.meshgrid(
             comp_13, comp_12)
 
         # II. Take care of rotated meshgrid
@@ -250,14 +234,14 @@ class Whisker(Percentile):
                               self._n_grid_pts)
 
         # generate meshgrid for main low percentile whisker
-        self._low_whisker_mesh_rotated[0], self._low_whisker_mesh_rotated[1] = np.meshgrid(
+        self._low_mesh_rotated[0], self._low_mesh_rotated[1] = np.meshgrid(
             comp_22, comp_21)
 
         # generate meshgrid for main high percentile whisker
-        self._high_whisker_mesh_rotated[0], self._high_whisker_mesh_rotated[1] = np.meshgrid(
+        self._high_mesh_rotated[0], self._high_mesh_rotated[1] = np.meshgrid(
             comp_22, comp_23)
 
-    def _replicate_whisker_meshgrids(self):
+    def _replicate_meshgrids(self):
         """
 
         """
@@ -265,138 +249,138 @@ class Whisker(Percentile):
         # 1. grid points for primary meshgrid
         high = self._pos_par.median + self._pos_par.iqr*self._whisker_scaling
         part_1 = np.repeat(high, np.power(self._n_grid_pts, 2))
-        self._primary_whisker_mesh_main = part_1.reshape(self._n_grid_pts,
-                                                         self._n_grid_pts)
+        self._primary_mesh = part_1.reshape(self._n_grid_pts,
+                                            self._n_grid_pts)
 
         # 2. grid points for secondary meshgrid
         low = self._pos_par.median - self._pos_par.iqr*self._whisker_scaling
         part_2 = np.repeat(low, np.power(self._n_grid_pts, 2))
-        self._secondary_whisker_mesh_main = part_2.reshape(self._n_grid_pts,
-                                                           self._n_grid_pts)
+        self._secondary_mesh = part_2.reshape(self._n_grid_pts,
+                                              self._n_grid_pts)
 
         # II. Replicate along width axis
         # 1. grid points for primary meshgrid
         high = self._width_par.median + self._width_par.iqr*self._whisker_scaling
         part_1 = np.repeat(high, np.power(self._n_grid_pts, 2))
-        self._primary_whisker_mesh_rotated = part_1.reshape(self._n_grid_pts,
-                                                            self._n_grid_pts)
+        self._primary_mesh_rotated = part_1.reshape(self._n_grid_pts,
+                                                    self._n_grid_pts)
 
         # 2. grid points for secondary meshgrid
         low = self._width_par.median - self._width_par.iqr*self._whisker_scaling
         part_2 = np.repeat(low, np.power(self._n_grid_pts, 2))
-        self._secondary_whisker_mesh_rotated = part_2.reshape(self._n_grid_pts,
-                                                              self._n_grid_pts)
+        self._secondary_mesh_rotated = part_2.reshape(self._n_grid_pts,
+                                                      self._n_grid_pts)
 
     def _establish_z_order(self):
         """
         """
-        self._x_whisker_main_data_1 = self._low_whisker_mesh_main[1]
-        self._x_whisker_main_data_2 = self._high_whisker_mesh_main[1]
-        self._y_whisker_main_data_1 = self._primary_whisker_mesh_main
-        self._y_whisker_main_data_2 = self._secondary_whisker_mesh_main
-        self._z_whisker_main_data_1 = self._low_whisker_mesh_main[0]
-        self._z_whisker_main_data_2 = self._high_whisker_mesh_main[0]
+        self._x_data_1 = self._low_mesh[1]
+        self._x_data_2 = self._high_mesh[1]
+        self._y_data_1 = self._primary_mesh
+        self._y_data_2 = self._secondary_mesh
+        self._z_data_1 = self._low_mesh[0]
+        self._z_data_2 = self._high_mesh[0]
 
-        self._x_whisker_rotated_data_1 = self._primary_whisker_mesh_rotated
-        self._x_whisker_rotated_data_2 = self._secondary_whisker_mesh_rotated
-        self._y_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[0]
-        self._y_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[0]
-        self._z_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[1]
-        self._z_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[1]
+        self._x_data_1_rotated = self._primary_mesh_rotated
+        self._x_data_2_rotated = self._secondary_mesh_rotated
+        self._y_data_1_rotated = self._low_mesh_rotated[0]
+        self._y_data_2_rotated = self._high_mesh_rotated[0]
+        self._z_data_1_rotated = self._low_mesh_rotated[1]
+        self._z_data_2_rotated = self._high_mesh_rotated[1]
 
     def _establish_x_order(self):
         """
         """
-        self._x_whisker_main_data_1 = self._low_whisker_mesh_main[0]
-        self._x_whisker_main_data_2 = self._high_whisker_mesh_main[0]
-        self._y_whisker_main_data_1 = self._low_whisker_mesh_main[1]
-        self._y_whisker_main_data_2 = self._high_whisker_mesh_main[1]
-        self._z_whisker_main_data_1 = self._primary_whisker_mesh_main
-        self._z_whisker_main_data_2 = self._secondary_whisker_mesh_main
+        self._x_data_1 = self._low_mesh[0]
+        self._x_data_2 = self._high_mesh[0]
+        self._y_data_1 = self._low_mesh[1]
+        self._y_data_2 = self._high_mesh[1]
+        self._z_data_1 = self._primary_mesh
+        self._z_data_2 = self._secondary_mesh
 
-        self._x_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[1]
-        self._x_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[1]
-        self._y_whisker_rotated_data_1 = self._primary_whisker_mesh_rotated
-        self._y_whisker_rotated_data_2 = self._secondary_whisker_mesh_rotated
-        self._z_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[0]
-        self._z_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[0]
+        self._x_data_1_rotated = self._low_mesh_rotated[1]
+        self._x_data_2_rotated = self._high_mesh_rotated[1]
+        self._y_data_1_rotated = self._primary_mesh_rotated
+        self._y_data_2_rotated = self._secondary_mesh_rotated
+        self._z_data_1_rotated = self._low_mesh_rotated[0]
+        self._z_data_2_rotated = self._high_mesh_rotated[0]
 
     def _establish_y_order(self):
         """
         """
-        self._x_whisker_main_data_1 = self._primary_whisker_mesh_main
-        self._x_whisker_main_data_2 = self._secondary_whisker_mesh_main
-        self._y_whisker_main_data_1 = self._low_whisker_mesh_main[0]
-        self._y_whisker_main_data_2 = self._high_whisker_mesh_main[0]
-        self._z_whisker_main_data_1 = self._low_whisker_mesh_main[1]
-        self._z_whisker_main_data_2 = self._high_whisker_mesh_main[1]
+        self._x_data_1 = self._primary_mesh
+        self._x_data_2 = self._secondary_mesh
+        self._y_data_1 = self._low_mesh[0]
+        self._y_data_2 = self._high_mesh[0]
+        self._z_data_1 = self._low_mesh[1]
+        self._z_data_2 = self._high_mesh[1]
 
-        self._x_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[0]
-        self._x_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[0]
-        self._y_whisker_rotated_data_1 = self._low_whisker_mesh_rotated[1]
-        self._y_whisker_rotated_data_2 = self._high_whisker_mesh_rotated[1]
-        self._z_whisker_rotated_data_1 = self._primary_whisker_mesh_rotated
-        self._z_whisker_rotated_data_2 = self._secondary_whisker_mesh_rotated
+        self._x_data_1_rotated = self._low_mesh_rotated[0]
+        self._x_data_2_rotated = self._high_mesh_rotated[0]
+        self._y_data_1_rotated = self._low_mesh_rotated[1]
+        self._y_data_2_rotated = self._high_mesh_rotated[1]
+        self._z_data_1_rotated = self._primary_mesh_rotated
+        self._z_data_2_rotated = self._secondary_mesh_rotated
 
     def _plot_z_surface(self, axes):
         """
         """
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_1, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_1, self._y_data_1, self._z_data_1,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_1, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_2, self._y_data_1, self._z_data_2,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_2, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_1, self._y_data_2, self._z_data_1,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_2, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_2, self._y_data_2, self._z_data_2,
                           alpha=self._alpha, color=self._z_color)
 
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_1_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_2_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_1_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_2_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._z_color)
 
     def _plot_x_surface(self, axes):
         """
         """
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_1, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_1, self._y_data_1, self._z_data_1,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_2, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_2, self._y_data_2, self._z_data_1,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_1, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_1, self._y_data_1, self._z_data_2,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_2, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_2, self._y_data_2, self._z_data_2,
                           alpha=self._alpha, color=self._x_color)
 
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_1_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_1_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_2_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._z_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_2_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._z_color)
 
     def _plot_y_surface(self, axes):
         """
         """
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_1, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_1, self._y_data_1, self._z_data_1,
                           alpha=self._alpha, color=self._y_color)
-        axes.plot_surface(self._x_whisker_main_data_1, self._y_whisker_main_data_2, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_1, self._y_data_2, self._z_data_2,
                           alpha=self._alpha, color=self._y_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_1, self._z_whisker_main_data_1,
+        axes.plot_surface(self._x_data_2, self._y_data_1, self._z_data_1,
                           alpha=self._alpha, color=self._y_color)
-        axes.plot_surface(self._x_whisker_main_data_2, self._y_whisker_main_data_2, self._z_whisker_main_data_2,
+        axes.plot_surface(self._x_data_2, self._y_data_2, self._z_data_2,
                           alpha=self._alpha, color=self._y_color)
 
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_1_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_1,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_2_rotated, self._z_data_1_rotated,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_rotated_data_1, self._y_whisker_rotated_data_1, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_1_rotated, self._y_data_1_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._x_color)
-        axes.plot_surface(self._x_whisker_rotated_data_2, self._y_whisker_rotated_data_2, self._z_whisker_rotated_data_2,
+        axes.plot_surface(self._x_data_2_rotated, self._y_data_2_rotated, self._z_data_2_rotated,
                           alpha=self._alpha, color=self._x_color)
