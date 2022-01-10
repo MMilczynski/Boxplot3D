@@ -10,7 +10,7 @@ class Params:
         - outliers
     """
 
-    def _init__(self, whisker_type='IQR'):
+    def __init__(self, whisker_type='IQR'):
         """
         :param whisker_type : either IQR or MinMax
         """

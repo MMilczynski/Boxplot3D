@@ -1,4 +1,7 @@
+"""
+"""
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from Boxplot3D.base_matplotlib.surface import PercentileSurfaces
@@ -44,17 +47,17 @@ def test_surface():
     bp_par_x.calculate_params(x)
     bp_par_y.calculate_params(y)
     bp_par_z.calculate_params(z)
-    percentiles = PercentileSurfaces(data_par=bp_par_z,
-                                     width_par=bp_par_x,
-                                     pos_par=bp_par_y,
-                                     order='z')
+    percentiles = PercentileSurfaces(data=bp_par_z,
+                                     width=bp_par_x,
+                                     pos=bp_par_y,
+                                     dimension='z')
 
     percentiles.build(axes)
 
-    whiskers = WhiskerSurfaces(data_par=bp_par_z,
-                               width_par=bp_par_x,
-                               pos_par=bp_par_y,
-                               order='z')
+    whiskers = WhiskerSurfaces(data=bp_par_z,
+                               width=bp_par_x,
+                               pos=bp_par_y,
+                               dimension='z')
     whiskers.build(axes)
 
     axes.set_xlabel('X')
@@ -77,50 +80,58 @@ def test_boxplot_3D():
     bp_par_y.calculate_params(y)
     bp_par_z.calculate_params(z)
 
-    perc_z = PercentileSurfaces(data_par=bp_par_z,
-                                width_par=bp_par_x,
-                                pos_par=bp_par_y,
-                                order='z')
+    perc_z = PercentileSurfaces(data=bp_par_z,
+                                width=bp_par_x,
+                                pos=bp_par_y,
+                                dimension='z')
     perc_z.build(axes)
 
-    whis_z = WhiskerSurfaces(data_par=bp_par_z,
-                             width_par=bp_par_x,
-                             pos_par=bp_par_y,
-                             order='z')
+    whis_z = WhiskerSurfaces(data=bp_par_z,
+                             width=bp_par_x,
+                             pos=bp_par_y,
+                             dimension='z')
     whis_z.build(axes)
 
-    perc_x = PercentileSurfaces(data_par=bp_par_x,
-                                width_par=bp_par_y,
-                                pos_par=bp_par_z,
-                                order='x')
+    perc_x = PercentileSurfaces(data=bp_par_x,
+                                width=bp_par_y,
+                                pos=bp_par_z,
+                                dimension='x')
     perc_x.build(axes)
 
-    whis_x = WhiskerSurfaces(data_par=bp_par_x,
-                             width_par=bp_par_y,
-                             pos_par=bp_par_z,
-                             order='x')
+    whis_x = WhiskerSurfaces(data=bp_par_x,
+                             width=bp_par_y,
+                             pos=bp_par_z,
+                             dimension='x')
 
     whis_x.build(axes)
 
-    perc_y = PercentileSurfaces(data_par=bp_par_y,
-                                width_par=bp_par_z,
-                                pos_par=bp_par_x,
-                                order='y')
+    perc_y = PercentileSurfaces(data=bp_par_y,
+                                width=bp_par_z,
+                                pos=bp_par_x,
+                                dimension='y')
     perc_y.build(axes)
 
-    whis_y = WhiskerSurfaces(data_par=bp_par_y,
-                             width_par=bp_par_z,
-                             pos_par=bp_par_x,
-                             order='y')
+    whis_y = WhiskerSurfaces(data=bp_par_y,
+                             width=bp_par_z,
+                             pos=bp_par_x,
+                             dimension='y')
     whis_y.build(axes)
 
     plot_z_medians(bp_par_x, bp_par_y, bp_par_z, axes, 3)
     plot_x_medians(bp_par_x, bp_par_y, bp_par_z, axes, 3)
     plot_y_medians(bp_par_x, bp_par_y, bp_par_z, axes, 3)
 
+    axes.set_xlabel('X')
+    axes.set_ylabel('Y')
+    axes.set_zlabel('Z')
+
     plt.show()
 
 
 if __name__ == '__main__':
     test_surface()
+    plt.show()
+    time.sleep(5.0)
+    plt.close("all")
+    test_boxplot_3D()
     plt.show()

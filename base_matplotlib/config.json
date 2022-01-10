@@ -1,6 +1,6 @@
 {
     "Surface": {
-        "iqr_offset": 0.02,
+        "median_width_rel_iqr": 0.02,
         "number_grid_points": 3,
         "whisker_scaling": 0.05,
         "alpha": 0.9,
